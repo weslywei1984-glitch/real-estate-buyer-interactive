@@ -267,7 +267,18 @@
       display: flex;
       gap: 14px;
       align-items: center;
-      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .choice::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.68) 48%, transparent 70%);
+      transform: translateX(-120%);
     }
 
     .choice:hover {
@@ -276,9 +287,19 @@
       box-shadow: 0 12px 28px rgba(11, 107, 98, 0.12);
     }
 
+    .choice:active,
+    .choice.tapped {
+      transform: translateY(0) scale(0.98);
+    }
+
     .choice.selected {
       border-color: var(--teal);
       background: var(--mint);
+      animation: selectedPop 0.34s ease;
+    }
+
+    .choice.selected::after {
+      animation: optionSweep 0.5s ease;
     }
 
     .choice-mark {
@@ -296,6 +317,7 @@
     .choice.selected .choice-mark {
       color: #fff;
       background: var(--teal);
+      animation: markPop 0.32s ease;
     }
 
     .choice strong {
@@ -329,12 +351,38 @@
       background: #fff;
       cursor: pointer;
       font-weight: 800;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .check:hover {
+      transform: translateY(-1px);
+      border-color: rgba(11, 107, 98, 0.42);
+      box-shadow: 0 10px 22px rgba(11, 107, 98, 0.1);
+    }
+
+    .check:active,
+    .check.tapped {
+      transform: scale(0.98);
+    }
+
+    .check.selected {
+      border-color: var(--teal);
+      background: #edf8f4;
+      color: var(--teal-dark);
+      animation: selectedPop 0.32s ease;
     }
 
     .check input {
       width: 18px;
       height: 18px;
       accent-color: var(--teal);
+    }
+
+    .check span {
+      position: relative;
+      z-index: 1;
     }
 
     .consent {
@@ -502,6 +550,10 @@
       font-size: 13px;
     }
 
+    .card.result-updated {
+      animation: resultPulse 0.42s ease;
+    }
+
     .btn {
       border: 0;
       min-height: 46px;
@@ -611,6 +663,7 @@
       padding: 7px 10px;
       font-size: 13px;
       line-height: 1;
+      animation: chipIn 0.24s ease both;
     }
 
     .score-panel {
@@ -670,6 +723,7 @@
       width: 0%;
       border-radius: inherit;
       background: linear-gradient(90deg, var(--teal), var(--coral), var(--gold));
+      transition: width 0.32s ease;
     }
 
     .routes {
@@ -695,6 +749,7 @@
       grid-template-columns: 34px minmax(0, 1fr);
       gap: 10px;
       align-items: start;
+      animation: slideIn 0.24s ease both;
     }
 
     .route-badge {
@@ -760,6 +815,90 @@
 
     .toast.show {
       display: block;
+    }
+
+    @keyframes selectedPop {
+      0% {
+        transform: scale(0.98);
+        box-shadow: 0 0 0 rgba(11, 107, 98, 0);
+      }
+      55% {
+        transform: scale(1.018);
+        box-shadow: 0 16px 30px rgba(11, 107, 98, 0.16);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 8px 20px rgba(11, 107, 98, 0.08);
+      }
+    }
+
+    @keyframes optionSweep {
+      0% {
+        transform: translateX(-120%);
+      }
+      100% {
+        transform: translateX(120%);
+      }
+    }
+
+    @keyframes markPop {
+      0% {
+        transform: scale(0.7) rotate(-8deg);
+      }
+      70% {
+        transform: scale(1.08) rotate(2deg);
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes chipIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(7px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes resultPulse {
+      0% {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+      45% {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px rgba(11, 107, 98, 0.11);
+      }
+      100% {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
     }
 
     @media (max-width: 900px) {
@@ -860,7 +999,7 @@
 
       <aside class="result">
         <h2>我的買房方向卡</h2>
-        <div class="card">
+        <div class="card" id="resultCard">
           <div class="photo" role="img" aria-label="明亮住宅外觀">
             <span>您的找房方向</span>
           </div>
@@ -1064,6 +1203,7 @@
     const chips = document.getElementById("chips");
     const personaName = document.getElementById("personaName");
     const personaCopy = document.getElementById("personaCopy");
+    const resultCard = document.getElementById("resultCard");
     const readinessPanel = document.getElementById("readinessPanel");
     const clarityScore = document.getElementById("clarityScore");
     const scoreBars = document.getElementById("scoreBars");
@@ -1072,6 +1212,7 @@
     const copyBtn = document.getElementById("copyBtn");
     const restartBtn = document.getElementById("restartBtn");
     const toast = document.getElementById("toast");
+    let renderTimer = null;
 
     function render() {
       if (state.completed) {
@@ -1181,6 +1322,20 @@
       return !step.condition || step.condition();
     }
 
+    function scheduleRender(delay = 120) {
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(() => {
+        renderTimer = null;
+        render();
+      }, delay);
+    }
+
+    function animateResultCard() {
+      resultCard.classList.remove("result-updated");
+      void resultCard.offsetWidth;
+      resultCard.classList.add("result-updated");
+    }
+
     function getNextStepIndex(fromIndex) {
       for (let index = fromIndex + 1; index < steps.length; index += 1) {
         if (isStepVisible(steps[index])) return index;
@@ -1265,7 +1420,7 @@
         return `
           <div class="check-grid">
             ${step.choices.map((choice) => `
-              <label class="check">
+              <label class="check ${values.includes(choice) ? "selected" : ""}">
                 <input type="checkbox" value="${choice}" ${values.includes(choice) ? "checked" : ""}>
                 <span>${choice}</span>
               </label>
@@ -1335,10 +1490,13 @@
       if (step.type === "single") {
         questionArea.querySelectorAll(".choice").forEach((button) => {
           button.addEventListener("click", () => {
+            button.classList.add("tapped");
             state[step.key] = button.dataset.choice;
             if (step.key === "budget" && state.budget !== "自訂金額") state.customBudget = "";
             if (step.key === "parking" && state.parking !== "需要") state.parkingType = "";
-            render();
+            renderSummary();
+            animateResultCard();
+            scheduleRender();
           });
         });
 
@@ -1356,6 +1514,7 @@
       if (step.type === "multi") {
         questionArea.querySelectorAll("input[type='checkbox']").forEach((box) => {
           box.addEventListener("change", (event) => {
+            event.target.closest(".check")?.classList.add("tapped");
             let values = [...questionArea.querySelectorAll("input[type='checkbox']:checked")].map((item) => item.value);
             if (step.exclusiveChoice && event.target.value === step.exclusiveChoice && event.target.checked) {
               values = [step.exclusiveChoice];
@@ -1365,7 +1524,9 @@
             }
             if (step.otherChoice && !values.includes(step.otherChoice)) state[step.otherKey] = "";
             state[step.valuesKey] = values;
-            render();
+            renderSummary();
+            animateResultCard();
+            scheduleRender();
           });
         });
 
