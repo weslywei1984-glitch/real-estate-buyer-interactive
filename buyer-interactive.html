@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>30秒買房方向小測驗</title>
+  <title>買房方向診斷</title>
   <style>
     :root {
       --ink: #172421;
@@ -155,6 +155,18 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .accuracy-note {
+      margin: -8px 0 22px;
+      border-left: 4px solid var(--teal);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--teal-dark);
+      padding: 11px 13px;
+      font-size: 14px;
+      line-height: 1.65;
+      font-weight: 800;
     }
 
     .question {
@@ -973,8 +985,8 @@
           <div class="brand">
             <div class="mark">家</div>
             <div>
-              <h1>30秒找出你的買房方向</h1>
-              <p>先玩小測驗，最後再決定要不要留下手機。</p>
+              <h1>買房方向診斷</h1>
+              <p>依照預算、區域和條件，整理可執行的找房方向。</p>
             </div>
           </div>
           <div class="progress-wrap">
@@ -985,9 +997,11 @@
 
         <div class="trust-strip">
           <span>台南小魏 買厝作伙</span>
-          <span>手機只用於回覆測驗結果</span>
+          <span>手機只用於回覆診斷結果</span>
           <span>不公開、不轉給第三方</span>
         </div>
+
+        <div class="accuracy-note">請依照目前最接近的狀況填寫，資訊越準，小魏越能避開不適合物件，先整理出真正值得看的方向。</div>
 
         <div class="question" id="questionArea"></div>
 
@@ -1004,8 +1018,8 @@
             <span>您的找房方向</span>
           </div>
           <div class="persona">
-            <p class="persona-name" id="personaName">測驗進行中</p>
-            <p class="persona-copy" id="personaCopy">先回答區域、預算和條件，最後會產生買房人格與小魏建議。</p>
+            <p class="persona-name" id="personaName">方向整理中</p>
+            <p class="persona-copy" id="personaCopy">先回答區域、預算和條件，最後會產生買方類型與小魏建議。</p>
           </div>
           <div class="readiness" id="readinessPanel"></div>
           <div class="score-panel">
@@ -1023,8 +1037,8 @@
           <div class="advice">
             <h3>建議找房方向</h3>
             <ul id="adviceList">
-              <li>先選區域、物件類型和預算，不用一開始就留下手機。</li>
-              <li>條件越明確，結果卡給的建議會越接近真實找房方向。</li>
+              <li>請用目前最接近的想法填寫，不用為了完整而勉強選。</li>
+              <li>條件越明確，方向卡給的建議會越接近真實找房需求。</li>
             </ul>
           </div>
         </div>
@@ -1160,10 +1174,10 @@
         key: "notes",
         kicker: "領取結果",
         title: "最後留下聯絡方式，讓小魏把結果整理給您",
-        hint: "前面已經完成測驗；手機只用來回覆這份買房方向與適合物件，不會公開或轉給第三方。",
+        hint: "前面已經完成方向診斷；手機只用來回覆這份買房方向與適合物件，不會公開或轉給第三方。",
         type: "final",
         placeholder: "可以輸入其他需求，也可以先空著",
-        consentText: "我同意依照這份測驗結果，由小魏與我聯繫並提供物件資訊"
+        consentText: "我同意依照這份診斷結果，由小魏與我聯繫並提供物件資訊"
       }
     ];
 
@@ -1231,7 +1245,7 @@
       progressText.textContent = `第 ${currentPosition} 步，共 ${visible.length} 步`;
       progressBar.style.width = `${(currentPosition / visible.length) * 100}%`;
       backBtn.disabled = getPrevStepIndex(state.step) === null;
-      nextBtn.textContent = getNextStepIndex(state.step) === null ? (BACKEND_URL ? "完成測驗" : "完成並複製") : "下一步";
+      nextBtn.textContent = getNextStepIndex(state.step) === null ? (BACKEND_URL ? "完成整理" : "完成並複製") : "下一步";
       nextBtn.disabled = !isStepValid(step);
 
       questionArea.innerHTML = `
@@ -1255,15 +1269,15 @@
         : "結果已完成，您也可以先複製摘要保留。";
 
       navBar.style.display = "none";
-      progressText.textContent = "遊戲完成";
+      progressText.textContent = "整理完成";
       progressBar.style.width = "100%";
       questionArea.innerHTML = `
         <div class="completion">
           <div class="completion-badge">✓</div>
           <div>
-            <p class="kicker">完成測驗</p>
-            <h2>恭喜您完成買房小遊戲</h2>
-            <p class="completion-copy">${statusText}下面是依照您剛剛選擇產生的互動式結果。</p>
+            <p class="kicker">方向整理完成</p>
+            <h2>您的買房方向已整理完成</h2>
+            <p class="completion-copy">${statusText}下面是依照您剛剛填寫內容產生的方向整理結果。</p>
           </div>
           <div class="result-tabs">
             <details open>
@@ -1301,14 +1315,14 @@
             </details>
           </div>
           <div class="completion-actions">
-            <button class="btn primary" id="completionCopy" type="button">複製我的結果</button>
-            <button class="btn ghost" id="completionRestart" type="button">重新玩一次</button>
+            <button class="btn primary" id="completionCopy" type="button">複製方向整理</button>
+            <button class="btn ghost" id="completionRestart" type="button">重新整理一次</button>
           </div>
         </div>
       `;
 
       document.getElementById("completionCopy").addEventListener("click", () => {
-        copySummary("已複製您的互動結果。");
+        copySummary("已複製您的方向整理結果。");
       });
       document.getElementById("completionRestart").addEventListener("click", resetGame);
       renderSummary();
@@ -1454,7 +1468,7 @@
           <input id="consent" type="checkbox" ${state.consent ? "checked" : ""}>
           <span>${step.consentText}</span>
         </label>
-        <div class="privacy-note">手機號碼只用於回覆測驗結果、物件方向和看屋聯繫，不會放在公開頁面，也不會轉給第三方。</div>
+        <div class="privacy-note">手機號碼只用於回覆診斷結果、物件方向和看屋聯繫，不會放在公開頁面，也不會轉給第三方。</div>
       `;
     }
 
@@ -2024,7 +2038,7 @@
       const directAdvice = getDirectAdvice();
       const readiness = getBuyerReadiness();
       return [
-        "30秒買房方向小測驗",
+        "買房方向診斷",
         `怎麼稱呼您：${state.name || "未填"}`,
         `手機號碼：${state.contact || "未填"}`,
         `想找哪個區域：${state.area || "未填"}`,
@@ -2135,7 +2149,7 @@
       } finally {
         if (!state.completed) {
           nextBtn.disabled = !isStepValid(steps[state.step]);
-          nextBtn.textContent = BACKEND_URL ? "完成測驗" : "完成並複製";
+          nextBtn.textContent = BACKEND_URL ? "完成整理" : "完成並複製";
         }
       }
     }
