@@ -1,3 +1,4 @@
 .npm-cache/
 .ms-playwright/
-
+.playwright-cli/
+output/playwright/

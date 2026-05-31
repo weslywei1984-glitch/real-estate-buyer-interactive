@@ -1,5 +1,6 @@
 const SHEET_ID = "1T32661HLRNWSz0vfm5Y3tBYt9XQ58QDLoopYW1WlA5s";
 const SHEET_NAME = "客戶回覆資料";
+const NOTIFY_EMAIL = "";
 
 const HEADERS = [
   "填寫時間",
@@ -22,6 +23,9 @@ const HEADERS = [
   "同意聯繫",
   "買方類型",
   "清楚度分數",
+  "客戶熱度",
+  "熱度判斷",
+  "看房節奏",
   "最直白建議",
   "來源",
   "後續狀態",
@@ -59,12 +63,17 @@ function doPost(e) {
       data.consent ? "是" : "否",
       text_(data.persona),
       text_(data.clarityScore),
+      text_(data.leadTemperature),
+      text_(data.leadTemperatureReason),
+      text_(data.buyerReadiness),
       [text_(data.directAdviceTitle), text_(data.directAdviceCopy)].filter(Boolean).join("。"),
       text_(data.source) || "互動網頁",
       "新名單",
       "",
       ""
     ]);
+
+    notifyByEmail_(data);
 
     return json_({ ok: true });
   } catch (error) {
@@ -98,6 +107,37 @@ function list_(value) {
 
 function text_(value) {
   return value === undefined || value === null ? "" : String(value).trim();
+}
+
+function notifyByEmail_(data) {
+  try {
+    const recipient = NOTIFY_EMAIL || Session.getEffectiveUser().getEmail();
+    if (!recipient) return;
+
+    const subject = `新買房測驗名單｜${text_(data.name) || "未填稱呼"}｜${text_(data.leadTemperature) || "未判斷"}`;
+    const body = [
+      "有新的買房方向測驗完成。",
+      "",
+      `稱呼：${text_(data.name)}`,
+      `手機：${text_(data.phone)}`,
+      `區域：${text_(data.area)}`,
+      `預算：${text_(data.budget)} ${text_(data.customBudget)}`,
+      `物件：${list_(data.propertyTypes)}`,
+      `屋齡：${list_(data.ages)}`,
+      `時程：${text_(data.timeline)}`,
+      `熱度：${text_(data.leadTemperature)}（${text_(data.leadTemperatureReason)}）`,
+      `買方類型：${text_(data.persona)}`,
+      "",
+      "最直白建議：",
+      [text_(data.directAdviceTitle), text_(data.directAdviceCopy)].filter(Boolean).join("。"),
+      "",
+      "請到 Google 試算表查看完整資料。"
+    ].join("\n");
+
+    MailApp.sendEmail(recipient, subject, body);
+  } catch (error) {
+    console.log(`notify failed: ${error}`);
+  }
 }
 
 function json_(payload) {

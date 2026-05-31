@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>買房需求小問卷</title>
+  <title>30秒買房方向小測驗</title>
   <style>
     :root {
       --ink: #172421;
@@ -74,7 +74,7 @@
       justify-content: space-between;
       gap: 18px;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 14px;
     }
 
     .brand {
@@ -134,6 +134,27 @@
       width: 0%;
       background: linear-gradient(90deg, var(--teal), var(--coral), var(--gold));
       transition: width 0.25s ease;
+    }
+
+    .trust-strip {
+      margin: 0 0 22px;
+      border: 1px solid #c8e4da;
+      border-radius: 8px;
+      background: #f3fbf8;
+      color: var(--teal-dark);
+      padding: 10px 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .trust-strip span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .question {
@@ -338,6 +359,33 @@
       flex: 0 0 auto;
     }
 
+    .lead-box,
+    .privacy-note {
+      border: 1px solid #c8e4da;
+      border-radius: 8px;
+      background: #f3fbf8;
+      color: var(--teal-dark);
+      padding: 12px 14px;
+      line-height: 1.65;
+    }
+
+    .lead-box {
+      margin-bottom: 16px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .lead-box strong {
+      font-size: 16px;
+    }
+
+    .privacy-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      background: #fff;
+    }
+
     .nav {
       margin-top: 22px;
       padding-top: 18px;
@@ -416,6 +464,42 @@
       flex-wrap: wrap;
       gap: 10px;
       margin-top: 4px;
+    }
+
+    .readiness {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 13px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .readiness-label {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: #fff;
+      background: var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .readiness-label.warm {
+      background: var(--coral);
+    }
+
+    .readiness-label.calm {
+      background: #516a79;
+    }
+
+    .readiness p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
     }
 
     .btn {
@@ -750,14 +834,20 @@
           <div class="brand">
             <div class="mark">家</div>
             <div>
-              <h1>買房需求小問卷</h1>
-              <p>簡單填幾個方向，幫您整理適合物件參考。</p>
+              <h1>30秒找出你的買房方向</h1>
+              <p>先玩小測驗，最後再決定要不要留下手機。</p>
             </div>
           </div>
           <div class="progress-wrap">
-            <div class="progress-label" id="progressText">第 1 步，共 12 步</div>
+            <div class="progress-label" id="progressText">第 1 步，共 11 步</div>
             <div class="progress"><span id="progressBar"></span></div>
           </div>
+        </div>
+
+        <div class="trust-strip">
+          <span>台南小魏 買厝作伙</span>
+          <span>手機只用於回覆測驗結果</span>
+          <span>不公開、不轉給第三方</span>
         </div>
 
         <div class="question" id="questionArea"></div>
@@ -769,15 +859,16 @@
       </section>
 
       <aside class="result">
-        <h2>買方偏好卡</h2>
+        <h2>我的買房方向卡</h2>
         <div class="card">
           <div class="photo" role="img" aria-label="明亮住宅外觀">
             <span>您的找房方向</span>
           </div>
           <div class="persona">
-            <p class="persona-name" id="personaName">慢慢整理中</p>
-            <p class="persona-copy" id="personaCopy">填完後會產生一張清楚的買房偏好卡，方便後續幫您找物件。</p>
+            <p class="persona-name" id="personaName">測驗進行中</p>
+            <p class="persona-copy" id="personaCopy">先回答區域、預算和條件，最後會產生買房人格與小魏建議。</p>
           </div>
+          <div class="readiness" id="readinessPanel"></div>
           <div class="score-panel">
             <div class="score-head">
               <h3>找房方向清楚度</h3>
@@ -793,8 +884,8 @@
           <div class="advice">
             <h3>建議找房方向</h3>
             <ul id="adviceList">
-              <li>先填稱呼與聯絡方式，再從區域、預算、房型慢慢篩。</li>
-              <li>不用填得很精準，大概方向就能開始整理。</li>
+              <li>先選區域、物件類型和預算，不用一開始就留下手機。</li>
+              <li>條件越明確，結果卡給的建議會越接近真實找房方向。</li>
             </ul>
           </div>
         </div>
@@ -810,20 +901,9 @@
   <script>
     const steps = [
       {
-        key: "basic",
-        kicker: "基本聯絡",
-        title: "先讓我知道怎麼稱呼您",
-        hint: "這兩項是表格裡的「怎麼稱呼您？」和「手機號碼」。",
-        type: "fields",
-        fields: [
-          { key: "name", label: "怎麼稱呼您？", placeholder: "例：王小姐、陳先生", required: true },
-          { key: "contact", label: "手機號碼", placeholder: "例：0912345678", required: true, validator: "phone" }
-        ]
-      },
-      {
         key: "area",
         kicker: "想找區域",
-        title: "想找哪個區域？",
+        title: "先從想住哪裡開始",
         hint: "例：永康、東區、安南區、仁德、歸仁、東橋、平實，或其他區域。",
         type: "text",
         placeholder: "請輸入想找的區域",
@@ -939,12 +1019,12 @@
       },
       {
         key: "notes",
-        kicker: "補充需求",
-        title: "您還有其他特別的購屋需求或考量嗎？",
-        hint: "例如：寵物友善、一樓、頂樓露台等。",
+        kicker: "領取結果",
+        title: "最後留下聯絡方式，讓小魏把結果整理給您",
+        hint: "前面已經完成測驗；手機只用來回覆這份買房方向與適合物件，不會公開或轉給第三方。",
         type: "final",
         placeholder: "可以輸入其他需求，也可以先空著",
-        consentText: "我同意依照填寫內容，由專人與我聯繫並提供物件資訊"
+        consentText: "我同意依照這份測驗結果，由小魏與我聯繫並提供物件資訊"
       }
     ];
 
@@ -984,6 +1064,7 @@
     const chips = document.getElementById("chips");
     const personaName = document.getElementById("personaName");
     const personaCopy = document.getElementById("personaCopy");
+    const readinessPanel = document.getElementById("readinessPanel");
     const clarityScore = document.getElementById("clarityScore");
     const scoreBars = document.getElementById("scoreBars");
     const routeList = document.getElementById("routeList");
@@ -1009,7 +1090,7 @@
       progressText.textContent = `第 ${currentPosition} 步，共 ${visible.length} 步`;
       progressBar.style.width = `${(currentPosition / visible.length) * 100}%`;
       backBtn.disabled = getPrevStepIndex(state.step) === null;
-      nextBtn.textContent = getNextStepIndex(state.step) === null ? (BACKEND_URL ? "送出需求" : "完成並複製") : "下一步";
+      nextBtn.textContent = getNextStepIndex(state.step) === null ? (BACKEND_URL ? "完成測驗" : "完成並複製") : "下一步";
       nextBtn.disabled = !isStepValid(step);
 
       questionArea.innerHTML = `
@@ -1027,6 +1108,7 @@
       const [persona, personaCopyText] = getPersona();
       const clarity = getClarityScore();
       const directAdvice = getDirectAdvice();
+      const readiness = getBuyerReadiness();
       const statusText = state.submitted
         ? "您的需求已送出，我們會依照結果整理適合物件。"
         : "結果已完成，您也可以先複製摘要保留。";
@@ -1057,10 +1139,23 @@
               </div>
             </details>
             <details>
+              <summary>我的看房節奏：${escapeHtml(readiness.clientLabel)}</summary>
+              <div class="tab-body">
+                <strong>${escapeHtml(readiness.clientTitle)}</strong><br>
+                ${escapeHtml(readiness.clientCopy)}
+              </div>
+            </details>
+            <details>
               <summary>最直白建議</summary>
               <div class="tab-body">
                 <strong>${escapeHtml(directAdvice.title)}</strong><br>
                 ${escapeHtml(directAdvice.copy)}
+              </div>
+            </details>
+            <details>
+              <summary>接下來會收到什麼</summary>
+              <div class="tab-body">
+                小魏會依照您剛剛的選項，先整理區域、預算和物件條件，再回覆您適合先看的方向；如果有符合物件，會再傳給您確認。
               </div>
             </details>
           </div>
@@ -1181,9 +1276,22 @@
       }
 
       return `
+        <div class="lead-box">
+          <strong>您的買房方向已整理完成</strong>
+          <span>留下稱呼和手機後，小魏會把這份結果整理給您，並依照條件回覆適合先看的物件方向。</span>
+        </div>
         <div class="fields">
+          <div class="field">
+            <label for="name">怎麼稱呼您？</label>
+            <input id="name" type="text" value="${escapeHtml(state.name)}" placeholder="例：王小姐、陳先生" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="contact">手機號碼</label>
+            <input id="contact" class="${state.contact && !isPhoneValid(state.contact) ? "invalid" : ""}" type="tel" value="${escapeHtml(state.contact)}" placeholder="例：0912345678" autocomplete="tel">
+            <div class="field-error" id="contactError" style="display: ${state.contact && !isPhoneValid(state.contact) ? "block" : "none"};">請輸入正確手機號碼，格式例如 0912345678。</div>
+          </div>
           <div class="field full">
-            <label for="notes">${step.title}</label>
+            <label for="notes">其他特別購屋需求或考量</label>
             <textarea id="notes" placeholder="${step.placeholder}">${escapeHtml(state.notes)}</textarea>
           </div>
         </div>
@@ -1191,6 +1299,7 @@
           <input id="consent" type="checkbox" ${state.consent ? "checked" : ""}>
           <span>${step.consentText}</span>
         </label>
+        <div class="privacy-note">手機號碼只用於回覆測驗結果、物件方向和看屋聯繫，不會放在公開頁面，也不會轉給第三方。</div>
       `;
     }
 
@@ -1269,6 +1378,20 @@
         return;
       }
 
+      ["name", "contact"].forEach((key) => {
+        const input = document.getElementById(key);
+        input.addEventListener("input", (event) => {
+          state[key] = event.target.value.trim();
+          if (key === "contact") {
+            const error = document.getElementById("contactError");
+            const invalid = Boolean(state.contact) && !isPhoneValid(state.contact);
+            input.classList.toggle("invalid", invalid);
+            if (error) error.style.display = invalid ? "block" : "none";
+          }
+          renderSummary();
+          nextBtn.disabled = !isStepValid(step);
+        });
+      });
       document.getElementById("notes").addEventListener("input", (event) => {
         state.notes = event.target.value.trim();
         renderSummary();
@@ -1302,7 +1425,7 @@
         return state[step.valuesKey].length > 0;
       }
       if (step.type === "final") {
-        return state.consent;
+        return Boolean(state.name) && isPhoneValid(state.contact) && state.consent;
       }
       return true;
     }
@@ -1317,7 +1440,7 @@
 
     function getChoiceHint(key, choice) {
       const hints = {
-        propertyType: {
+        propertyTypes: {
           "套房": "低總價、好整理，適合單身或投資",
           "電梯大樓": "管理與生活便利性較完整",
           "透天": "空間彈性高，適合家庭使用",
@@ -1326,7 +1449,7 @@
           "廠房": "重視坪數、動線與使用分區",
           "土地": "重視地段、分區與未來規劃"
         },
-        age: {
+        ages: {
           "預售屋": "可挑格局與樓層，但交屋時間較長",
           "5年內": "屋況新，整理成本通常較低",
           "10年內": "兼顧屋況與成熟生活圈",
@@ -1404,7 +1527,7 @@
       if (state.budget === "800萬以下" || state.rooms === "1～2房" || hasPropertyType("套房")) {
         return ["首購起步型買方", "適合先鎖定低總價、生活便利、負擔相對穩定的物件。"];
       }
-      return ["慢慢整理中", "填完後會產生一張清楚的買房偏好卡，方便後續幫您找物件。"];
+      return ["方向探索型買方", "適合先用區域、預算和生活條件抓出範圍，再慢慢比較物件。"];
     }
 
     function displayBudget() {
@@ -1528,6 +1651,87 @@
       return Math.min(100, score);
     }
 
+    function getBuyerReadiness() {
+      let score = 0;
+      const reasons = [];
+
+      if (state.timeline === "1個月內") {
+        score += 32;
+        reasons.push("1個月內想購屋");
+      } else if (state.timeline === "3個月內") {
+        score += 28;
+        reasons.push("3個月內想購屋");
+      } else if (state.timeline === "半年內") {
+        score += 20;
+        reasons.push("半年內會開始比較");
+      } else if (state.timeline === "一年內") {
+        score += 12;
+        reasons.push("一年內觀察");
+      } else if (state.timeline === "先看看，不急") {
+        score += 5;
+        reasons.push("目前先了解市場");
+      }
+
+      if (state.area) {
+        score += 15;
+        reasons.push("區域明確");
+      }
+      if (state.budget === "自訂金額" && state.customBudget) {
+        score += 18;
+        reasons.push("預算有自訂範圍");
+      } else if (state.budget && state.budget !== "2000萬以上") {
+        score += 15;
+        reasons.push("預算區間明確");
+      } else if (state.budget === "2000萬以上") {
+        score += 9;
+        reasons.push("預算彈性較大");
+      }
+      if (state.propertyTypes.length >= 1 && state.propertyTypes.length <= 3) {
+        score += 12;
+        reasons.push("物件類型有方向");
+      }
+      if (state.ages.length && !hasAge("不拘")) {
+        score += 8;
+        reasons.push("屋齡條件明確");
+      }
+      if (state.purpose && state.purpose !== "先了解行情") {
+        score += 10;
+        reasons.push("購屋用途清楚");
+      }
+      if (isPhoneValid(state.contact)) {
+        score += 5;
+      }
+
+      if (score >= 76) {
+        return {
+          level: "high",
+          internalLabel: "高意願",
+          clientLabel: "準備看房型",
+          clientTitle: "可以開始整理實際物件清單",
+          clientCopy: "您的區域、預算或時程已經有方向，適合直接挑 3 到 5 間符合條件的物件來比較。",
+          reason: reasons.slice(0, 4).join("、") || "需求條件完整"
+        };
+      }
+      if (score >= 50) {
+        return {
+          level: "warm",
+          internalLabel: "中意願",
+          clientLabel: "方向整理型",
+          clientTitle: "先整理條件，再安排看房",
+          clientCopy: "您的方向已經有輪廓，建議先用預算、區域和屋齡縮小範圍，再挑物件比較。",
+          reason: reasons.slice(0, 4).join("、") || "已有部分找房方向"
+        };
+      }
+      return {
+        level: "calm",
+        internalLabel: "低意願",
+        clientLabel: "行情觀察型",
+        clientTitle: "先建立行情感，不急著看房",
+        clientCopy: "目前適合先了解區域價格、常見物件型態和貸款負擔，等方向更明確再安排看屋。",
+        reason: reasons.slice(0, 4).join("、") || "目前以了解市場為主"
+      };
+    }
+
     function getDirectAdvice() {
       const area = state.area || "希望區域";
       const budget = displayBudget() || "預算範圍";
@@ -1594,6 +1798,12 @@
       personaName.textContent = name;
       personaCopy.textContent = copy;
 
+      const readiness = getBuyerReadiness();
+      readinessPanel.innerHTML = `
+        <span class="readiness-label ${readiness.level === "high" ? "" : readiness.level}">${escapeHtml(readiness.clientLabel)}</span>
+        <p>${escapeHtml(readiness.clientCopy)}</p>
+      `;
+
       const clarity = getClarityScore();
       clarityScore.textContent = `${clarity.total}%`;
       scoreBars.innerHTML = clarity.categories.map((item) => `
@@ -1651,8 +1861,9 @@
       const [persona] = getPersona();
       const clarity = getClarityScore();
       const directAdvice = getDirectAdvice();
+      const readiness = getBuyerReadiness();
       return [
-        "買房需求小問卷",
+        "30秒買房方向小測驗",
         `怎麼稱呼您：${state.name || "未填"}`,
         `手機號碼：${state.contact || "未填"}`,
         `想找哪個區域：${state.area || "未填"}`,
@@ -1670,6 +1881,8 @@
         `同意聯繫：${state.consent ? "是" : "否"}`,
         `買方類型：${persona}`,
         `找房方向清楚度：${clarity.total}%`,
+        `看房節奏：${readiness.clientLabel}`,
+        `客戶熱度：${readiness.internalLabel}（${readiness.reason}）`,
         `最直白建議：${directAdvice.title}。${directAdvice.copy}`
       ].join("\n");
     }
@@ -1678,6 +1891,7 @@
       const [persona] = getPersona();
       const clarity = getClarityScore();
       const directAdvice = getDirectAdvice();
+      const readiness = getBuyerReadiness();
       return {
         submittedAt: new Date().toISOString(),
         name: state.name,
@@ -1699,6 +1913,9 @@
         consent: state.consent,
         persona,
         clarityScore: clarity.total,
+        leadTemperature: readiness.internalLabel,
+        leadTemperatureReason: readiness.reason,
+        buyerReadiness: readiness.clientLabel,
         directAdviceTitle: directAdvice.title,
         directAdviceCopy: directAdvice.copy,
         source: "互動網頁",
@@ -1757,7 +1974,7 @@
       } finally {
         if (!state.completed) {
           nextBtn.disabled = !isStepValid(steps[state.step]);
-          nextBtn.textContent = BACKEND_URL ? "送出需求" : "完成並複製";
+          nextBtn.textContent = BACKEND_URL ? "完成測驗" : "完成並複製";
         }
       }
     }
