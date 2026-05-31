@@ -348,6 +348,76 @@
       align-items: center;
     }
 
+    .completion {
+      display: grid;
+      gap: 18px;
+      align-content: center;
+      min-height: 480px;
+    }
+
+    .completion-badge {
+      width: 70px;
+      height: 70px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--teal), var(--coral), var(--gold));
+      font-size: 34px;
+      font-weight: 900;
+      box-shadow: 0 14px 35px rgba(11, 107, 98, 0.2);
+    }
+
+    .completion h2 {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .completion-copy {
+      margin: 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .result-tabs {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .result-tabs details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .result-tabs summary {
+      cursor: pointer;
+      padding: 14px 16px;
+      color: var(--teal-dark);
+      font-weight: 900;
+      list-style-position: inside;
+    }
+
+    .result-tabs .tab-body {
+      border-top: 1px solid var(--line);
+      padding: 14px 16px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .completion-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
     .btn {
       border: 0;
       min-height: 46px;
@@ -692,7 +762,7 @@
 
         <div class="question" id="questionArea"></div>
 
-        <div class="nav">
+        <div class="nav" id="navBar">
           <button class="btn ghost" id="backBtn" type="button">上一步</button>
           <button class="btn primary" id="nextBtn" type="button">下一步</button>
         </div>
@@ -899,10 +969,14 @@
       fengShui: [],
       fengShuiOther: "",
       notes: "",
-      consent: false
+      consent: false,
+      completed: false,
+      submitted: false,
+      submitError: false
     };
 
     const questionArea = document.getElementById("questionArea");
+    const navBar = document.getElementById("navBar");
     const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
     const backBtn = document.getElementById("backBtn");
@@ -919,6 +993,12 @@
     const toast = document.getElementById("toast");
 
     function render() {
+      if (state.completed) {
+        renderCompletion();
+        return;
+      }
+
+      navBar.style.display = "";
       if (!isStepVisible(steps[state.step])) {
         state.step = getNextStepIndex(state.step) ?? getPrevStepIndex(state.step) ?? 0;
       }
@@ -940,6 +1020,61 @@
       `;
 
       bindStepEvents(step);
+      renderSummary();
+    }
+
+    function renderCompletion() {
+      const [persona, personaCopyText] = getPersona();
+      const clarity = getClarityScore();
+      const directAdvice = getDirectAdvice();
+      const statusText = state.submitted
+        ? "您的需求已送出，我們會依照結果整理適合物件。"
+        : "結果已完成，您也可以先複製摘要保留。";
+
+      navBar.style.display = "none";
+      progressText.textContent = "遊戲完成";
+      progressBar.style.width = "100%";
+      questionArea.innerHTML = `
+        <div class="completion">
+          <div class="completion-badge">✓</div>
+          <div>
+            <p class="kicker">完成測驗</p>
+            <h2>恭喜您完成買房小遊戲</h2>
+            <p class="completion-copy">${statusText}下面是依照您剛剛選擇產生的互動式結果。</p>
+          </div>
+          <div class="result-tabs">
+            <details open>
+              <summary>我的買房人格</summary>
+              <div class="tab-body">
+                <strong>${escapeHtml(persona)}</strong><br>
+                ${escapeHtml(personaCopyText)}
+              </div>
+            </details>
+            <details>
+              <summary>找房方向清楚度：${clarity.total}%</summary>
+              <div class="tab-body">
+                ${clarity.categories.map((item) => `${escapeHtml(item.label)}：${item.value}%`).join("<br>")}
+              </div>
+            </details>
+            <details>
+              <summary>最直白建議</summary>
+              <div class="tab-body">
+                <strong>${escapeHtml(directAdvice.title)}</strong><br>
+                ${escapeHtml(directAdvice.copy)}
+              </div>
+            </details>
+          </div>
+          <div class="completion-actions">
+            <button class="btn primary" id="completionCopy" type="button">複製我的結果</button>
+            <button class="btn ghost" id="completionRestart" type="button">重新玩一次</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("completionCopy").addEventListener("click", () => {
+        copySummary("已複製您的互動結果。");
+      });
+      document.getElementById("completionRestart").addEventListener("click", resetGame);
       renderSummary();
     }
 
@@ -1589,7 +1724,11 @@
 
     async function submitLead() {
       if (!BACKEND_URL) {
+        state.submitted = false;
+        state.submitError = false;
+        state.completed = true;
         await copySummary("尚未設定後端網址，已先複製需求摘要。");
+        render();
         return;
       }
 
@@ -1604,12 +1743,22 @@
           },
           body: JSON.stringify(getLeadPayload())
         });
+        state.submitted = true;
+        state.submitError = false;
+        state.completed = true;
+        render();
         showToast("已送出，資料會進到客戶回覆資料表。");
       } catch {
+        state.submitted = false;
+        state.submitError = true;
+        state.completed = true;
         await copySummary("送出失敗，已先複製需求摘要。");
+        render();
       } finally {
-        nextBtn.disabled = !isStepValid(steps[state.step]);
-        nextBtn.textContent = BACKEND_URL ? "送出需求" : "完成並複製";
+        if (!state.completed) {
+          nextBtn.disabled = !isStepValid(steps[state.step]);
+          nextBtn.textContent = BACKEND_URL ? "送出需求" : "完成並複製";
+        }
       }
     }
 
@@ -1635,7 +1784,9 @@
 
     copyBtn.addEventListener("click", copySummary);
 
-    restartBtn.addEventListener("click", () => {
+    restartBtn.addEventListener("click", resetGame);
+
+    function resetGame() {
       Object.assign(state, {
         step: 0,
         name: "",
@@ -1654,11 +1805,14 @@
         fengShui: [],
         fengShuiOther: "",
         notes: "",
-        consent: false
+        consent: false,
+        completed: false,
+        submitted: false,
+        submitError: false
       });
       toast.classList.remove("show");
       render();
-    });
+    }
 
     function escapeHtml(value) {
       return String(value)
